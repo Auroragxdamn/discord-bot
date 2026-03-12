@@ -1,7 +1,16 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const config = require('./config.json');
+require('dotenv').config();
+
+let config = {};
+try {
+    config = require('./config.json');
+} catch (e) {
+    // Ignore require error in production (since config.json is in .gitignore)
+}
+
+const token = process.env.TOKEN || config.token;
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -33,4 +42,4 @@ for (const file of eventFiles) {
     }
 }
 
-client.login(config.token);
+client.login(token);
