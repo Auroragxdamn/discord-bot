@@ -1,11 +1,13 @@
-# Discord.js v14 Bot
+# Discord.js v14 Music Bot
 
-A modern, clean, and dynamic command handler setup for a Discord bot using Discord.js v14.
+A modern, clean, and dynamic command handler setup for a Discord bot using Discord.js v14, featuring a high-quality music player.
 
 ## Features
+- **Advanced Music Player:** Play high-quality audio from YouTube and Spotify via a custom SoundCloud DRM-bypass bridge.
+- **Discord DAVE Protocol Ready:** Fully supports Discord's new End-to-End Encryption (E2EE) voice channels.
 - **Dynamic Command Handling:** Drop new command files into the `commands/` folder and they are automatically loaded.
 - **Dynamic Event Handling:** Drop new event listener files into the `events/` folder to keep your main file clean.
-- **Slash Command Registration:** Easily register and update application (`/`) commands.
+- **Slash Command Registration:** Easily register and update application (`/`) commands (`/play`, `/stop`, `/skip`).
 - **Auto-restarting Dev Environment:** Uses `nodemon` to automatically refresh the bot when you save changes to your code.
 
 ## Getting Started

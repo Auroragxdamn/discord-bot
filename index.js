@@ -1,6 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const { Player } = require('discord-player');
+const { DefaultExtractors, SoundCloudExtractor } = require('@discord-player/extractor');
 require('dotenv').config();
 
 let config = {};
@@ -12,7 +14,38 @@ try {
 
 const token = process.env.TOKEN || config.token;
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ 
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates
+    ] 
+});
+
+const player = new Player(client, {
+    ytdlOptions: {
+        quality: 'highestaudio',
+        highWaterMark: 1 << 25
+    }
+});
+
+// loadMulti is an async function in Discord-Player v6+.
+player.extractors.loadMulti(DefaultExtractors).then(() => {
+    console.log('Default Extractors loaded successfully.');
+}).catch(console.error);
+
+player.events.on('playerStart', (queue, track) => {
+    queue.metadata.followUp(`🎶 **${track.title}** çalmaya başladı!`);
+});
+
+player.events.on('error', (queue, error) => {
+    console.log(`[Player Event Error] ${error.message}`);
+});
+player.events.on('playerError', (queue, error) => {
+    console.log(`[Audio Player Error] ${error.message}`);
+});
+player.events.on('debug', (queue, message) => {
+    console.log(`[Player Debug] ${message}`);
+});
 
 client.commands = new Collection();
 
