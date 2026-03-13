@@ -4,13 +4,13 @@ const { useMainPlayer } = require('discord-player');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('skip')
-        .setDescription('Skip the currently playing song'),
+        .setDescription('Şu anda çalan şarkıyı atla'),
     async execute(interaction) {
         const player = useMainPlayer();
         const channel = interaction.member.voice.channel;
 
         if (!channel) {
-            return interaction.reply({ content: 'You must be in a voice channel to skip music!', ephemeral: true });
+            return interaction.reply({ content: 'Şarkı atlamak için bir ses kanalında olmalısın!', ephemeral: true });
         }
 
         const queue = player.nodes.get(interaction.guild);

@@ -5,17 +5,17 @@ const youtubedl = require('youtube-dl-exec');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('play')
-        .setDescription('Play a song from YouTube')
+        .setDescription('YouTube\'dan şarkı çal')
         .addStringOption(option =>
             option.setName('song')
-                .setDescription('The name or URL of the song to play')
+                .setDescription('Çalınacak şarkının adı veya URL\'si')
                 .setRequired(true)),
     async execute(interaction) {
         const player = useMainPlayer();
         const channel = interaction.member.voice.channel;
 
         if (!channel) {
-            return interaction.reply({ content: 'You must be in a voice channel to play music!', ephemeral: true });
+            return interaction.reply({ content: 'Müzik çalmak için bir ses kanalında olmalısın!', ephemeral: true });
         }
 
         await interaction.deferReply();
@@ -34,7 +34,7 @@ module.exports = {
                     addHeader: ['referer:youtube.com', 'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36']
                 });
 
-                let bestFormat = info.formats.filter(f => f.vcodec === 'none' && f.acodec !== 'none').sort((a,b) => b.tbr - a.tbr)[0];
+                let bestFormat = info.formats.filter(f => f.vcodec === 'none' && f.acodec !== 'none').sort((a, b) => b.tbr - a.tbr)[0];
                 if (!bestFormat) bestFormat = info.formats.filter(f => f.acodec !== 'none')[0];
 
                 if (!bestFormat || !bestFormat.url) {

@@ -70,9 +70,10 @@ npm start
 
 | Command | Description |
 |---------|-------------|
-| `/play <song>` | Play a song by name or URL (YouTube) |
-| `/skip` | Skip the currently playing track |
-| `/stop` | Stop playback, clear the queue, and leave the voice channel |
+| `/play <song>` | YouTube'dan şarkı adı veya URL ile çal |
+| `/skip` | Şu anda çalan şarkıyı atla |
+| `/queue` | Müzik kuyruğunu göster |
+| `/stop` | Müziği durdur, kuyruğu temizle ve kanaldan ayrıl |
 
 ## ☁️ Deployment (Dokploy)
 
@@ -92,8 +93,9 @@ This bot is pre-configured for deployment via **Dokploy** with Nixpacks.
 discord-bot/
 ├── commands/           # Slash command files
 │   ├── play.js         # /play — YouTube playback
-│   ├── skip.js         # /skip — Skip current track
-│   └── stop.js         # /stop — Stop playback & leave channel
+│   ├── skip.js         # /skip — Şarkı atla
+│   ├── queue.js        # /queue — Kuyruğu göster
+│   └── stop.js         # /stop — Durdur ve kanaldan ayrıl
 ├── events/             # Discord event listeners
 │   ├── ready.js        # Bot ready event
 │   └── interactionCreate.js  # Slash command router
