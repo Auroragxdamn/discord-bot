@@ -33,22 +33,22 @@ const player = new Player(client, {
     }
 });
 
-// Leave voice channel after 3 minutes of idle (no songs in queue)
+// Leave voice channel after 5 minutes of idle (no songs in queue)
 player.events.on('emptyQueue', (queue) => {
     setTimeout(() => {
         if (!queue.isPlaying()) {
             queue.delete();
         }
-    }, 3 * 60 * 1000); // 3 minutes
+    }, 5 * 60 * 1000); // 5 minutes
 });
 
-// Leave voice channel after 3 minutes if current channel is empty
+// Leave voice channel after 5 minutes if current channel is empty
 player.events.on('emptyChannel', (queue) => {
     setTimeout(() => {
         if (queue.channel.members.size <= 1) { // Only bot left
             queue.delete();
         }
-    }, 3 * 60 * 1000); // 3 minutes
+    }, 5 * 60 * 1000); // 5 minutes
 });
 
 // loadMulti is an async function in Discord-Player v6+.

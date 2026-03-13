@@ -51,6 +51,9 @@ module.exports = {
                 nodeOptions: { 
                     metadata: interaction, 
                     volume: 80,
+                    leaveOnEnd: false,
+                    leaveOnEmpty: false,
+                    encoderArgs: ['-af', 'loudnorm=I=-14:TP=-1:LRA=11'],
                 }
             });
 
