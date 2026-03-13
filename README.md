@@ -1,10 +1,10 @@
 # 🎵 Discord Music Bot
 
-A feature-rich Discord music bot built with **Discord.js v14** and **discord-player**, capable of playing audio from **YouTube** and **SoundCloud** with full support for Discord's DAVE (E2EE) voice protocol.
+A feature-rich Discord music bot built with **Discord.js v14** and **discord-player**, capable of playing audio from **YouTube** with full support for Discord's DAVE (E2EE) voice protocol.
 
 ## ✨ Features
 
-- **Multi-Source Playback** — Play music from YouTube (via `yt-dlp`) and SoundCloud (via `play-dl` with automatic DRM bypass).
+- **YouTube Playback** — Play music from YouTube via `yt-dlp` with automatic best-quality audio extraction.
 - **DAVE Protocol Ready** — Fully supports Discord's End-to-End Encrypted voice channels.
 - **Slash Commands** — Modern `/play`, `/skip`, and `/stop` interaction commands.
 - **Dynamic Handlers** — Auto-loading command and event handlers; just drop new `.js` files into `commands/` or `events/`.
@@ -70,7 +70,7 @@ npm start
 
 | Command | Description |
 |---------|-------------|
-| `/play <song>` | Play a song by name or URL (YouTube / SoundCloud) |
+| `/play <song>` | Play a song by name or URL (YouTube) |
 | `/skip` | Skip the currently playing track |
 | `/stop` | Stop playback, clear the queue, and leave the voice channel |
 
@@ -91,7 +91,7 @@ This bot is pre-configured for deployment via **Dokploy** with Nixpacks.
 ```
 discord-bot/
 ├── commands/           # Slash command files
-│   ├── play.js         # /play — YouTube & SoundCloud playback
+│   ├── play.js         # /play — YouTube playback
 │   ├── skip.js         # /skip — Skip current track
 │   └── stop.js         # /stop — Stop playback & leave channel
 ├── events/             # Discord event listeners
@@ -109,7 +109,6 @@ discord-bot/
 
 - [Discord.js](https://discord.js.org/) v14 — Discord API wrapper
 - [discord-player](https://discord-player.js.org/) v7 — Audio player framework
-- [play-dl](https://github.com/play-dl/play-dl) — SoundCloud streaming & search
 - [youtube-dl-exec](https://github.com/microlinkhq/youtube-dl-exec) — YouTube audio extraction via yt-dlp
 - [dotenv](https://github.com/motdotla/dotenv) — Environment variable management
 - [FFmpeg](https://ffmpeg.org/) — Audio transcoding
