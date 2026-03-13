@@ -20,7 +20,9 @@
     "discord.js": "^14.25.1",
     "dotenv": "^17.3.1",
     "ffmpeg-static": "^5.3.0",
-    "libsodium-wrappers": "^0.8.2",
+    "libsodium-wrappers": "^0.8.2",    
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
     "youtube-dl-exec": "^3.1.3"
   }
 }
