@@ -18,14 +18,13 @@ module.exports = {
         // Safety check for metadata
         const trackTitle = currentTrack.title && currentTrack.title !== 'videoplayback' ? currentTrack.title : 'Bilinmeyen Şarkı';
         const trackUrl = currentTrack.url && currentTrack.url.length < 500 ? currentTrack.url : 'https://youtube.com';
-        const trackDuration = currentTrack.duration || '0:00';
 
         const embed = new EmbedBuilder()
             .setTitle('🎶 Müzik Kuyruğu')
             .setColor(0x5865F2)
             .setDescription(
                 `**Şu anda çalıyor:**\n` +
-                `🎵 [${trackTitle.substring(0, 100)}](${trackUrl}) — \`${trackDuration}\``
+                `🎵 [${trackTitle.substring(0, 100)}](${trackUrl})`
             );
 
         if (tracks.length > 0) {
@@ -34,7 +33,7 @@ module.exports = {
                 .map((track, i) => {
                     const title = track.title && track.title !== 'videoplayback' ? track.title : 'Bilinmeyen Şarkı';
                     const url = track.url && track.url.length < 500 ? track.url : 'https://youtube.com';
-                    return `**${i + 1}.** [${title.substring(0, 100)}](${url}) — \`${track.duration || '0:00'}\``;
+                    return `**${i + 1}.** [${title.substring(0, 100)}](${url})`;
                 })
                 .join('\n');
 
@@ -57,7 +56,7 @@ module.exports = {
             return await interaction.reply({ embeds: [embed] });
         } catch (e) {
             console.error('Queue Embed Error:', e);
-            return interaction.reply({ content: 'Kuyruk gösterilirken bir hata oluştu! Metin çok uzun olabilir.', ephemeral: true });
+            return interaction.reply({ content: 'Kuyruk gösterilirken bir hata oluştu!', ephemeral: true });
         }
     },
 };

@@ -46,14 +46,21 @@ module.exports = {
 
             console.log(`[Play Command] YouTube Extracted Stream URL: ${bestFormat.url.substring(0, 50)}...`);
 
-            // Use the info from yt-dlp to provide a nicer message
-            // and try to play the direct URL.
-            await player.play(channel, bestFormat.url, {
+            // Play the direct URL, but capture the track to set metadata
+            const { track } = await player.play(channel, bestFormat.url, {
                 nodeOptions: { 
                     metadata: interaction, 
                     volume: 80,
                 }
             });
+
+            // Manually set metadata so it looks good in /queue and events
+            if (track) {
+                track.title = info.title || 'Bilinmeyen Şarkı';
+                track.url = query; // Original YouTube link
+                track.thumbnail = info.thumbnail;
+                track.author = info.uploader;
+            }
 
             return interaction.followUp(`🎶 **${info.title}** kuyruğa eklendi ve çalınıyor!`);
 
