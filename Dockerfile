@@ -3,6 +3,7 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 COPY package*.json ./
+ENV YOUTUBE_DL_SKIP_PYTHON_CHECK=1
 RUN npm ci --omit=dev
 
 # ── Runtime Stage ────────────────────────────────────────────
