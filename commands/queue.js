@@ -15,23 +15,32 @@ module.exports = {
         const currentTrack = queue.currentTrack;
         const tracks = queue.tracks.toArray();
 
+        // Safety check for metadata
+        const trackTitle = currentTrack.title && currentTrack.title !== 'videoplayback' ? currentTrack.title : 'Bilinmeyen Şarkı';
+        const trackUrl = currentTrack.url && currentTrack.url.length < 500 ? currentTrack.url : 'https://youtube.com';
+        const trackDuration = currentTrack.duration || '0:00';
+
         const embed = new EmbedBuilder()
             .setTitle('🎶 Müzik Kuyruğu')
             .setColor(0x5865F2)
             .setDescription(
                 `**Şu anda çalıyor:**\n` +
-                `🎵 [${currentTrack.title}](${currentTrack.url}) — \`${currentTrack.duration}\``
+                `🎵 [${trackTitle.substring(0, 100)}](${trackUrl}) — \`${trackDuration}\``
             );
 
         if (tracks.length > 0) {
             const upcomingList = tracks
                 .slice(0, 10)
-                .map((track, i) => `**${i + 1}.** [${track.title}](${track.url}) — \`${track.duration}\``)
+                .map((track, i) => {
+                    const title = track.title && track.title !== 'videoplayback' ? track.title : 'Bilinmeyen Şarkı';
+                    const url = track.url && track.url.length < 500 ? track.url : 'https://youtube.com';
+                    return `**${i + 1}.** [${title.substring(0, 100)}](${url}) — \`${track.duration || '0:00'}\``;
+                })
                 .join('\n');
 
             embed.addFields({
                 name: `📋 Sıradaki Şarkılar (${tracks.length})`,
-                value: upcomingList
+                value: upcomingList.substring(0, 1024)
             });
 
             if (tracks.length > 10) {
@@ -44,6 +53,11 @@ module.exports = {
             });
         }
 
-        return interaction.reply({ embeds: [embed] });
+        try {
+            return await interaction.reply({ embeds: [embed] });
+        } catch (e) {
+            console.error('Queue Embed Error:', e);
+            return interaction.reply({ content: 'Kuyruk gösterilirken bir hata oluştu! Metin çok uzun olabilir.', ephemeral: true });
+        }
     },
 };
