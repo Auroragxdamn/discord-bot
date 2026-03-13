@@ -5,3 +5,4 @@ config.json
 .env
 test*.js
 test*.mp3
+database.sqlite
