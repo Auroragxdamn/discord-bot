@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { Player } = require('discord-player');
-const { DefaultExtractors, SoundCloudExtractor } = require('@discord-player/extractor');
+const { DefaultExtractors } = require('@discord-player/extractor');
 require('dotenv').config();
 
 let config = {};
@@ -31,6 +31,24 @@ const player = new Player(client, {
         quality: 'highestaudio',
         highWaterMark: 1 << 25
     }
+});
+
+// Leave voice channel after 3 minutes of idle (no songs in queue)
+player.events.on('emptyQueue', (queue) => {
+    setTimeout(() => {
+        if (!queue.isPlaying()) {
+            queue.delete();
+        }
+    }, 3 * 60 * 1000); // 3 minutes
+});
+
+// Leave voice channel after 3 minutes if current channel is empty
+player.events.on('emptyChannel', (queue) => {
+    setTimeout(() => {
+        if (queue.channel.members.size <= 1) { // Only bot left
+            queue.delete();
+        }
+    }, 3 * 60 * 1000); // 3 minutes
 });
 
 // loadMulti is an async function in Discord-Player v6+.

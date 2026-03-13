@@ -5,10 +5,10 @@ const youtubedl = require('youtube-dl-exec');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('play')
-        .setDescription('YouTube\'dan şarkı çal')
+        .setDescription('YouTube linkiyle şarkı çal')
         .addStringOption(option =>
             option.setName('song')
-                .setDescription('Çalınacak şarkının adı veya URL\'si')
+                .setDescription('YouTube şarkı linki')
                 .setRequired(true)),
     async execute(interaction) {
         const player = useMainPlayer();
@@ -18,46 +18,39 @@ module.exports = {
             return interaction.reply({ content: 'Müzik çalmak için bir ses kanalında olmalısın!', ephemeral: true });
         }
 
-        await interaction.deferReply();
-
         const query = interaction.options.getString('song');
 
+        // Only accept YouTube links
+        if (!query.includes('youtube.com') && !query.includes('youtu.be')) {
+            return interaction.reply({ content: '❌ Sadece YouTube linkleri destekleniyor! Bir YouTube linki yapıştır.', ephemeral: true });
+        }
+
+        await interaction.deferReply();
+
         try {
-            // If user pasted a YouTube link, extract audio natively via yt-dlp
-            if (query.includes('youtube.com') || query.includes('youtu.be')) {
-                console.log(`[Play Command] Detected YouTube Link. Extracting via yt-dlp...`);
-                const info = await youtubedl(query, {
-                    dumpSingleJson: true,
-                    noCheckCertificates: true,
-                    noWarnings: true,
-                    preferFreeFormats: true,
-                    addHeader: ['referer:youtube.com', 'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36']
-                });
+            console.log(`[Play Command] Detected YouTube Link. Extracting via yt-dlp...`);
+            const info = await youtubedl(query, {
+                dumpSingleJson: true,
+                noCheckCertificates: true,
+                noWarnings: true,
+                preferFreeFormats: true,
+                addHeader: ['referer:youtube.com', 'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36']
+            });
 
-                let bestFormat = info.formats.filter(f => f.vcodec === 'none' && f.acodec !== 'none').sort((a, b) => b.tbr - a.tbr)[0];
-                if (!bestFormat) bestFormat = info.formats.filter(f => f.acodec !== 'none')[0];
+            let bestFormat = info.formats.filter(f => f.vcodec === 'none' && f.acodec !== 'none').sort((a, b) => b.tbr - a.tbr)[0];
+            if (!bestFormat) bestFormat = info.formats.filter(f => f.acodec !== 'none')[0];
 
-                if (!bestFormat || !bestFormat.url) {
-                    return interaction.followUp('YouTube üzerinden ses dosyası alınamadı!');
-                }
-
-                console.log(`[Play Command] YouTube Extracted Stream URL: ${bestFormat.url.substring(0, 50)}...`);
-
-                await player.play(channel, bestFormat.url, {
-                    nodeOptions: { metadata: interaction, volume: 80 }
-                });
-
-                return interaction.followUp(`🎶 **${info.title}** kuyruğa eklendi ve çalınıyor!`);
+            if (!bestFormat || !bestFormat.url) {
+                return interaction.followUp('YouTube üzerinden ses dosyası alınamadı!');
             }
 
-            // For search queries, use discord-player's default extractors (YouTube search)
-            console.log(`[Play Command] Searching YouTube for: ${query}`);
+            console.log(`[Play Command] YouTube Extracted Stream URL: ${bestFormat.url.substring(0, 50)}...`);
 
-            const result = await player.play(channel, query, {
+            await player.play(channel, bestFormat.url, {
                 nodeOptions: { metadata: interaction, volume: 80 }
             });
 
-            return interaction.followUp(`🎶 **${result.track.title}** kuyruğa eklendi ve çalınıyor!`);
+            return interaction.followUp(`🎶 **${info.title}** kuyruğa eklendi ve çalınıyor!`);
 
         } catch (error) {
             console.error('Player play error:', error);
