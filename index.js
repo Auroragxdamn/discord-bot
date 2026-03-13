@@ -39,6 +39,8 @@ player.extractors.loadMulti(DefaultExtractors).then(() => {
 }).catch(console.error);
 
 player.events.on('playerStart', (queue, track) => {
+    // Skip generic titles from raw stream URLs (e.g. YouTube CDN "videoplayback")
+    if (!track.title || track.title === 'videoplayback' || track.title.startsWith('http')) return;
     queue.metadata.followUp(`🎶 **${track.title}** çalmaya başladı!`);
 });
 
