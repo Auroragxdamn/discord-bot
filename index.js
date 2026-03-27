@@ -9,14 +9,42 @@ const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { Player } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
 require('dotenv').config();
+require('./db.js');
 
 const token = process.env.TOKEN;
+
+if (!token) {
+    throw new Error('TOKEN environment variable is missing.');
+}
+
+process.on('unhandledRejection', (error) => {
+    console.error('[UNHANDLED REJECTION]');
+    console.error(error);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('[UNCAUGHT EXCEPTION]');
+    console.error(error);
+});
 
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildVoiceStates
     ]
+});
+
+client.once('ready', () => {
+    console.log(`[BOT] Discord istemcisi hazir: ${client.user.tag}`);
+});
+
+client.on('error', (error) => {
+    console.error('[CLIENT ERROR]');
+    console.error(error);
+});
+
+client.on('warn', (message) => {
+    console.warn(`[CLIENT WARN] ${message}`);
 });
 
 const player = new Player(client, {
@@ -72,11 +100,16 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-    if ('data' in command && 'execute' in command) {
-        client.commands.set(command.data.name, command);
-    } else {
-        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+    try {
+        const command = require(filePath);
+        if ('data' in command && 'execute' in command) {
+            client.commands.set(command.data.name, command);
+        } else {
+            console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        }
+    } catch (error) {
+        console.error(`[COMMAND LOAD ERROR] ${filePath}`);
+        console.error(error);
     }
 }
 
@@ -93,4 +126,13 @@ for (const file of eventFiles) {
     }
 }
 
-client.login(token);
+console.log('[BOT] Discord girisi baslatiliyor...');
+client.login(token)
+    .then(() => {
+        console.log('[BOT] Discord girisi istegi gonderildi.');
+    })
+    .catch((error) => {
+        console.error('[BOT] Discord girisi basarisiz.');
+        console.error(error);
+        process.exit(1);
+    });

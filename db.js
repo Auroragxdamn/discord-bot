@@ -7,14 +7,31 @@ if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
 
-const db = new sqlite3.Database(path.join(dataDir, 'database.sqlite'));
+const dbPath = path.join(dataDir, 'database.sqlite');
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error(`[DB] SQLite baglantisi kurulamadı: ${dbPath}`);
+        console.error(err);
+        return;
+    }
+
+    console.log(`[DB] SQLite baglantisi hazir: ${dbPath}`);
+});
 
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         balance INTEGER DEFAULT 0,
         last_daily INTEGER DEFAULT 0
-    )`);
+    )`, (err) => {
+        if (err) {
+            console.error('[DB] users tablosu hazirlanamadi.');
+            console.error(err);
+            return;
+        }
+
+        console.log('[DB] users tablosu hazir.');
+    });
 });
 
 function getUser(id) {

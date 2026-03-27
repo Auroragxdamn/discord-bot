@@ -13,8 +13,19 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 
 // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 for (const file of commandFiles) {
-    const command = require(path.join(commandsPath, file));
-    commands.push(command.data.toJSON());
+    const filePath = path.join(commandsPath, file);
+
+    try {
+        const command = require(filePath);
+        if (command?.data?.toJSON) {
+            commands.push(command.data.toJSON());
+        } else {
+            console.warn(`[WARNING] Slash command export is invalid: ${filePath}`);
+        }
+    } catch (error) {
+        console.error(`[COMMAND DEPLOY LOAD ERROR] ${filePath}`);
+        console.error(error);
+    }
 }
 
 // Construct and prepare an instance of the REST module
