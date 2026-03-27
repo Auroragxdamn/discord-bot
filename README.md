@@ -56,7 +56,7 @@ Bu komut:
 | `/skip` | Çalınan şarkıyı atla |
 | `/queue` | Sıradaki şarkıları gör |
 | `/stop` | Müziği durdur ve kanaldan ayrıl |
-| `/sarki oneri link:<link> ` | Haftalık şarkı listesine şarkı önerisi ekle |
+| `/sarki oneri <link> ` | Haftalık şarkı listesine şarkı önerisi ekle |
 | `/sarki listele ` | Haftalık öneri şarkı listesini görüntüle|
 
 ### 💰 Ekonomi ve Casino Komutları
