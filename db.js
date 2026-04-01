@@ -54,6 +54,25 @@ db.serialize(() => {
 
         console.log('[DB] song_suggestions tablosu hazir.');
     });
+
+    db.run(`CREATE TABLE IF NOT EXISTS game_suggestions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id TEXT,
+        channel_id TEXT,
+        user_id TEXT NOT NULL,
+        username TEXT NOT NULL,
+        category TEXT NOT NULL,
+        suggestion TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    )`, (err) => {
+        if (err) {
+            console.error('[DB] game_suggestions tablosu hazirlanamadi.');
+            console.error(err);
+            return;
+        }
+
+        console.log('[DB] game_suggestions tablosu hazir.');
+    });
 });
 
 function getDateParts(date = new Date()) {
@@ -179,6 +198,29 @@ function getSongSuggestionsByGuild(guildId, weekKey = getCurrentWeekKey(), limit
     });
 }
 
+function addGameSuggestion(entry) {
+    return new Promise((resolve, reject) => {
+        db.run(
+            `INSERT INTO game_suggestions (
+                guild_id, channel_id, user_id, username, category, suggestion, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                entry.guildId || null,
+                entry.channelId || null,
+                entry.userId,
+                entry.username,
+                entry.category,
+                entry.suggestion,
+                entry.createdAt
+            ],
+            function(err) {
+                if (err) return reject(err);
+                resolve({ id: this.lastID });
+            }
+        );
+    });
+}
+
 module.exports = {
     getUser,
     updateUser,
@@ -186,5 +228,6 @@ module.exports = {
     getTopUsers,
     addSongSuggestion,
     getSongSuggestionsByGuild,
-    getCurrentWeekKey
+    getCurrentWeekKey,
+    addGameSuggestion
 };
