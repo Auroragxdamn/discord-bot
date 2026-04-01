@@ -23,7 +23,7 @@ RUN groupadd -r bot && useradd -r -g bot -m bot
 WORKDIR /app
 
 # Create writable data directories for local fallback and container persistence
-RUN mkdir -p /app/db /data
+RUN mkdir -p /app/db /data /var/lib/discord-bot
 
 # Copy compiled modules from builder
 COPY --from=builder /app/node_modules ./node_modules
@@ -32,7 +32,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY . .
 
 # Ensure the bot user can write both app-local and mounted data directories
-RUN chown -R bot:bot /app /data
+RUN chown -R bot:bot /app /data /var/lib/discord-bot
 
 # Switch to the non-root user
 USER bot

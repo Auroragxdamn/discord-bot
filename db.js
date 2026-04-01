@@ -3,7 +3,26 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_TIMEZONE = 'Europe/Istanbul';
-const dataDir = process.env.DB_DIR || path.join(__dirname, 'db');
+function resolveDataDir() {
+    if (process.env.DB_DIR) {
+        return process.env.DB_DIR;
+    }
+
+    const persistentDirs = [
+        '/var/lib/discord-bot',
+        '/data'
+    ];
+
+    for (const dir of persistentDirs) {
+        if (fs.existsSync(dir)) {
+            return dir;
+        }
+    }
+
+    return path.join(__dirname, 'db');
+}
+
+const dataDir = resolveDataDir();
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
