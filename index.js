@@ -7,7 +7,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { Player } = require('./discord-player-bootstrap');
-const { DefaultExtractors } = require('@discord-player/extractor');
 require('dotenv').config();
 require('./db.js');
 
@@ -71,11 +70,6 @@ player.events.on('emptyChannel', (queue) => {
         }
     }, 5 * 60 * 1000); // 5 minutes
 });
-
-// loadMulti is an async function in Discord-Player v6+.
-player.extractors.loadMulti(DefaultExtractors).then(() => {
-    console.log('Default Extractors loaded successfully.');
-}).catch(console.error);
 
 player.events.on('playerStart', (queue, track) => {
     // Skip generic titles from raw stream URLs (e.g. YouTube CDN "videoplayback")
