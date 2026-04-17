@@ -1,12 +1,12 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { useMainPlayer } = require('../discord-player-bootstrap');
+const { useMasterPlayer } = require('../discord-player-bootstrap');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('skip')
         .setDescription('Şu anda çalan şarkıyı atla'),
     async execute(interaction) {
-        const player = useMainPlayer();
+        const player = useMasterPlayer();
         const channel = interaction.member.voice.channel;
 
         if (!channel) {

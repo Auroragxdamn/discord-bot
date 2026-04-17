@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { QueryType, useMainPlayer } = require('../discord-player-bootstrap');
+const { QueryType, useMasterPlayer } = require('../discord-player-bootstrap');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,7 +10,7 @@ module.exports = {
                 .setDescription('YouTube şarkı linki')
                 .setRequired(true)),
     async execute(interaction) {
-        const player = useMainPlayer();
+        const player = useMasterPlayer();
         const channel = interaction.member.voice.channel;
 
         if (!channel) {
