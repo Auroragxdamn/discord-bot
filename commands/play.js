@@ -1,9 +1,9 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { spawn } = require('node:child_process');
 const youtubedl = require('youtube-dl-exec');
 const {
     QueryType,
     Track,
-    createFFmpegStream,
     useMasterPlayer
 } = require('../discord-player-bootstrap');
 
@@ -70,6 +70,69 @@ function createYtDlpProcess(query) {
     });
 }
 
+function createPlayableStream(query) {
+    const ytDlpProcess = createYtDlpProcess(query);
+    const ffmpegProcess = spawn('ffmpeg', [
+        '-loglevel', 'error',
+        '-i', 'pipe:0',
+        '-analyzeduration', '0',
+        '-f', 's16le',
+        '-ar', '48000',
+        '-ac', '2',
+        ...LOUDNORM_ARGS,
+        'pipe:1'
+    ], {
+        stdio: ['pipe', 'pipe', 'pipe']
+    });
+
+    ytDlpProcess.stdout.pipe(ffmpegProcess.stdin);
+
+    const destroyChildren = () => {
+        if (!ytDlpProcess.killed) {
+            ytDlpProcess.kill('SIGKILL');
+        }
+
+        if (!ffmpegProcess.killed) {
+            ffmpegProcess.kill('SIGKILL');
+        }
+    };
+
+    ytDlpProcess.on('close', () => {
+        if (!ffmpegProcess.killed) {
+            ffmpegProcess.stdin.end();
+        }
+    });
+
+    ytDlpProcess.on('error', (error) => {
+        console.error('[yt-dlp process error]', error);
+        destroyChildren();
+    });
+
+    ffmpegProcess.on('error', (error) => {
+        console.error('[ffmpeg process error]', error);
+        destroyChildren();
+    });
+
+    ytDlpProcess.stderr?.on('data', (chunk) => {
+        const message = String(chunk).trim();
+        if (message) {
+            console.log(`[yt-dlp] ${message}`);
+        }
+    });
+
+    ffmpegProcess.stderr?.on('data', (chunk) => {
+        const message = String(chunk).trim();
+        if (message) {
+            console.log(`[ffmpeg] ${message}`);
+        }
+    });
+
+    ffmpegProcess.stdout.on('close', destroyChildren);
+    ffmpegProcess.stdout.on('error', destroyChildren);
+
+    return ffmpegProcess.stdout;
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('play')
@@ -110,23 +173,7 @@ module.exports = {
                             return null;
                         }
 
-                        const process = createYtDlpProcess(sourceUrl);
-
-                        process.stderr?.on('data', (chunk) => {
-                            const message = String(chunk).trim();
-                            if (message) {
-                                console.log(`[yt-dlp] ${message}`);
-                            }
-                        });
-
-                        process.on('error', (error) => {
-                            console.error('[yt-dlp process error]', error);
-                        });
-
-                        return createFFmpegStream(process.stdout, {
-                            fmt: 's16le',
-                            encoderArgs: LOUDNORM_ARGS
-                        });
+                        return createPlayableStream(sourceUrl);
                     }
                 }
             });
