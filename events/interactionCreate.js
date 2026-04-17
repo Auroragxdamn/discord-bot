@@ -1,9 +1,39 @@
-const { Events } = require('discord.js');
+const { Events, MessageFlags } = require('discord.js');
+
+function normalizeInteractionOptions(options) {
+    if (!options || typeof options !== 'object' || Array.isArray(options)) {
+        return options;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(options, 'ephemeral')) {
+        return options;
+    }
+
+    const normalized = { ...options };
+    const isEphemeral = normalized.ephemeral;
+    delete normalized.ephemeral;
+
+    if (isEphemeral && normalized.flags === undefined) {
+        normalized.flags = MessageFlags.Ephemeral;
+    }
+
+    return normalized;
+}
+
+function patchInteractionResponses(interaction) {
+    for (const methodName of ['reply', 'followUp']) {
+        const originalMethod = interaction[methodName].bind(interaction);
+
+        interaction[methodName] = (options) => originalMethod(normalizeInteractionOptions(options));
+    }
+}
 
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
         if (!interaction.isChatInputCommand()) return;
+
+        patchInteractionResponses(interaction);
 
         const command = interaction.client.commands.get(interaction.commandName);
 

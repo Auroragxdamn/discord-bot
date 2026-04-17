@@ -26,4 +26,9 @@ function ensureSoundCloudStub() {
 
 ensureSoundCloudStub();
 
-module.exports = require('discord-player');
+const discordPlayer = require('discord-player');
+
+module.exports = {
+    ...discordPlayer,
+    useMainPlayer: discordPlayer.useMainPlayer || discordPlayer.useMasterPlayer
+};
