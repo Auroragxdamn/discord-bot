@@ -8,6 +8,10 @@ const {
 } = require('../discord-player-bootstrap');
 
 const LOUDNORM_ARGS = ['-af', 'loudnorm=I=-14:TP=-1:LRA=11'];
+const YTDLP_HEADERS = [
+    'referer:youtube.com',
+    'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
+];
 
 function isYouTubeUrl(value) {
     return value.includes('youtube.com') || value.includes('youtu.be');
@@ -32,26 +36,8 @@ async function resolveTrackData(query, requestedBy, player) {
         noCheckCertificates: true,
         noWarnings: true,
         preferFreeFormats: true,
-        addHeader: [
-            'referer:youtube.com',
-            'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
-        ]
+        addHeader: YTDLP_HEADERS
     });
-
-    const formats = Array.isArray(info.formats) ? info.formats : [];
-    let bestFormat = formats
-        .filter((format) => format.vcodec === 'none' && format.acodec !== 'none' && format.url)
-        .sort((a, b) => (b.abr || b.tbr || 0) - (a.abr || a.tbr || 0))[0];
-
-    if (!bestFormat) {
-        bestFormat = formats
-            .filter((format) => format.acodec !== 'none' && format.url)
-            .sort((a, b) => (b.abr || b.tbr || 0) - (a.abr || a.tbr || 0))[0];
-    }
-
-    if (!bestFormat || !bestFormat.url) {
-        throw new Error('YouTube üzerinden oynatilabilir ses akisi alinmadi.');
-    }
 
     return new Track(player, {
         title: info.title || 'Bilinmeyen şarkı',
@@ -66,8 +52,21 @@ async function resolveTrackData(query, requestedBy, player) {
         source: 'arbitrary',
         raw: {
             source: 'arbitrary',
-            engine: bestFormat.url
+            engine: query
         }
+    });
+}
+
+function createYtDlpProcess(query) {
+    return youtubedl.exec(query, {
+        format: 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
+        output: '-',
+        noPlaylist: true,
+        noCheckCertificates: true,
+        noWarnings: true,
+        addHeader: YTDLP_HEADERS
+    }, {
+        stdio: ['ignore', 'pipe', 'pipe']
     });
 }
 
@@ -105,13 +104,26 @@ module.exports = {
                     leaveOnEnd: false,
                     leaveOnEmpty: false,
                     onBeforeCreateStream: async (requestedTrack) => {
-                        const streamUrl = requestedTrack.raw?.engine;
+                        const sourceUrl = requestedTrack.raw?.engine;
 
-                        if (requestedTrack.raw?.source !== 'arbitrary' || !streamUrl) {
+                        if (requestedTrack.raw?.source !== 'arbitrary' || !sourceUrl) {
                             return null;
                         }
 
-                        return createFFmpegStream(streamUrl, {
+                        const process = createYtDlpProcess(sourceUrl);
+
+                        process.stderr?.on('data', (chunk) => {
+                            const message = String(chunk).trim();
+                            if (message) {
+                                console.log(`[yt-dlp] ${message}`);
+                            }
+                        });
+
+                        process.on('error', (error) => {
+                            console.error('[yt-dlp process error]', error);
+                        });
+
+                        return createFFmpegStream(process.stdout, {
                             fmt: 's16le',
                             encoderArgs: LOUDNORM_ARGS
                         });
