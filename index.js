@@ -47,6 +47,7 @@ client.on('warn', (message) => {
 });
 
 const player = new Player(client, {
+    autoRegisterExtractor: false,
     ytdlOptions: {
         quality: 'highestaudio',
         highWaterMark: 1 << 25
@@ -120,13 +121,20 @@ for (const file of eventFiles) {
     }
 }
 
-console.log('[BOT] Discord girisi baslatiliyor...');
-client.login(token)
-    .then(() => {
-        console.log('[BOT] Discord girisi istegi gonderildi.');
-    })
-    .catch((error) => {
-        console.error('[BOT] Discord girisi basarisiz.');
-        console.error(error);
-        process.exit(1);
-    });
+async function startBot() {
+    const extractorLoadResult = await player.extractors.loadDefault();
+
+    if (extractorLoadResult?.error) {
+        throw new Error(`Default extractors yuklenemedi: ${extractorLoadResult.error.message || extractorLoadResult.error}`);
+    }
+
+    console.log('[BOT] Discord girisi baslatiliyor...');
+    await client.login(token);
+    console.log('[BOT] Discord girisi istegi gonderildi.');
+}
+
+startBot().catch((error) => {
+    console.error('[BOT] Baslangic basarisiz.');
+    console.error(error);
+    process.exit(1);
+});
